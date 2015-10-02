@@ -67,7 +67,7 @@ public class ShowDataBase extends Activity {
         for(List<Token> list : tokenLists) {
             for (Token token : list) {
                 //TODO デバッグ用なので直す
-                String reading = token.getSurfaceForm() + token.getPartOfSpeech();
+                String reading = token.getSurfaceForm() + token.getAllFeatures();
                 TextView tokenView = new TextView(this);
                 tokenView.setText(reading);
                 layout.addView(tokenView);
