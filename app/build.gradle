@@ -26,4 +26,6 @@ android {
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
     compile files('libs/kuromoji-0.7.7.jar')
+    compile files('libs/kuromoji-naist-jdic-0.9-SNAPSHOT.jar')
+    compile files('libs/sanmoku-0.0.5.jar')
 }
