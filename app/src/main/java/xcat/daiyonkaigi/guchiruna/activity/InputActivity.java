@@ -11,12 +11,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import net.reduls.sanmoku.Morpheme;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import xcat.daiyonkaigi.guchiruna.R;
-import xcat.daiyonkaigi.guchiruna.db.ArticleDBOpenHelper;
+import xcat.daiyonkaigi.guchiruna.db.GuchiCommonDBOpenHelper;
+import xcat.daiyonkaigi.guchiruna.negapozi.AsyncHttpRequest;
+import xcat.daiyonkaigi.guchiruna.tokenize.StringToToken;
 
 
 public class InputActivity extends Activity {
@@ -27,30 +33,52 @@ public class InputActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         //DBの初期化処理
-        ArticleDBOpenHelper helper = new ArticleDBOpenHelper(this);
+        GuchiCommonDBOpenHelper helper = new GuchiCommonDBOpenHelper(this);
         final SQLiteDatabase db = helper.getWritableDatabase();
 
         //テキスト及び関連する情報の内容を取得
         final EditText editText = (EditText) findViewById(R.id.editText);
 
-        //TODO 日付などの情報を取得
-
         //ボタン押下時の登録処理
-        Button confirmButton = (Button)this.findViewById(R.id.button);
-        confirmButton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View view){
+        Button confirmButton = (Button) this.findViewById(R.id.button);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+
                 String article = editText.getText().toString();
 
-                //記事と日付を格納
-                ContentValues articleInsertValues = new ContentValues();
-                articleInsertValues.put("article", article);
-                articleInsertValues.put("date", getCurrentDate());
+                //空なら何もさせずに次画面へ飛ばす
+                if (!"".equals(article) && null != article) {
+                    //記事と日付を格納
+                    ContentValues articleInsertValues = new ContentValues();
+                    articleInsertValues.put("article", article);
+                    articleInsertValues.put("date", getCurrentDate());
 
-                long id = db.insert("article", "null", articleInsertValues);
+                    db.insert("article", "null", articleInsertValues);
 
+                    //品詞分解処理
+                    List<Morpheme> tokenLists = new ArrayList();
+                    tokenLists = StringToToken.tokenize(article);
+
+                    AsyncHttpRequest asyncTask = new AsyncHttpRequest(InputActivity.this);
+                    asyncTask.execute(article);     //asyncTask.execute(  このなかにつぶやきの内容を格納する  );
+
+                    //品詞を判定し、対象の品詞と文字列をDBに格納
+                    for (Morpheme m : tokenLists) {
+                        if (judgeInsertToken(m.feature)) {
+                            String hinsi = m.feature.split(",")[0];
+                            String word = m.surface;
+
+                            ContentValues wordInsertValues = new ContentValues();
+                            wordInsertValues.put("hinsi", hinsi);
+                            wordInsertValues.put("word", word);
+
+                            db.insert("rankings", "null", wordInsertValues);
+                        }
+                    }
+                }
                 //次画面での表示処理
-                Intent dbIntent = new Intent(InputActivity.this,TimelineActivity.class);
-                startActivity(dbIntent);
+                Intent timelineIntent = new Intent(InputActivity.this, TimelineActivity.class);
+                startActivity(timelineIntent);
             }
         });
     }
@@ -58,7 +86,10 @@ public class InputActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        //getMenuInflater().inflate(R.menu.menu_bottom, menu);
+        //TODO メニュー処理の実装（ここじゃない気がする）
+        menu.add(0 , Menu.FIRST , Menu.NONE , "メニュー1");
+        menu.add(0 , Menu.FIRST + 1 ,Menu.NONE , "メニュー2");
         return true;
     }
 
@@ -70,20 +101,35 @@ public class InputActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        //if (id == R.id.action_settings) {
+        //    return true;
+        //}
 
         return super.onOptionsItemSelected(item);
     }
 
     /**
      * 現在日時をyyyy/MM/dd HH:mm:ss形式で取得するメソッドです。
+     *
      * @return yyyy/MM/dd HH:mm:ssで表記された時刻表記
      */
-    private String getCurrentDate(){
+    private String getCurrentDate() {
         final DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         final Date date = new Date(System.currentTimeMillis());
         return df.format(date);
+    }
+
+    /**
+     * 単語１つの解析情報を受け取り、DBに格納対象であるかを判定するメソッドです。
+     * 仕様上、品詞及び動詞を格納対象としています。
+     *
+     * @return true(格納対象である) / false(格納対象でない)
+     */
+    private boolean judgeInsertToken(String token) {
+        String[] tokens = token.split(",");
+        //品詞情報はトークン情報中、インデックス1に設定されています
+        String hinsi = tokens[0];
+        //クソ判定
+        return ("動詞".equals(hinsi) || "名詞".equals(hinsi) || "形容詞".equals(hinsi));
     }
 }

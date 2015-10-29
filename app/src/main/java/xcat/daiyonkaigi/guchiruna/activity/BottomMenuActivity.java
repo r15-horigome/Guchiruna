@@ -1,33 +1,27 @@
 package xcat.daiyonkaigi.guchiruna.activity;
 
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.MenuInflater;
 
-public class BottomMenuActivity extends Activity{
+import xcat.daiyonkaigi.guchiruna.R;
+
+public class BottomMenuActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_timeline);
     }
+
+    // Option Menu が最初に表示される時に1度だけ呼び出される
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // メニューの要素を追加して取得
-        MenuItem actionItem = menu.add("Action Button Help Icon");
-        // アイコンを設定
-        actionItem.setIcon(android.R.drawable.ic_menu_help);
-
-        // SHOW_AS_ACTION_ALWAYS:常に表示
-        actionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Toast.makeText(this, "Selected Item: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+        super.onCreateOptionsMenu(menu);
+        // MenuInflater の取得
+        MenuInflater menuInflater = getMenuInflater();
+        // MenuInflater から XML の取得
+        //menuInflater.inflate(R.menu.menu_bottom, menu);
         return true;
     }
 }

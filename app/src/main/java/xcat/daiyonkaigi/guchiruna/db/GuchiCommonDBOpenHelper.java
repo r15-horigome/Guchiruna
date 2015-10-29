@@ -15,11 +15,19 @@ public class GuchiCommonDBOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table article(" + "article text," + "date text" + ");");
-        db.execSQL("create table words(" + "hinsi text" + ");");
-        db.execSQL("create table rankings(word text,sum integer);");
+        //タイムライン用のテーブル
+        db.execSQL("CREATE TABLE article(" +
+                "article text " +
+                ",date text " +
+                ");");
+        //ランキング用のテーブル
+        db.execSQL("CREATE TABLE rankings(" +
+                "word TEXT" +
+                ",hinsi TEXT" +
+                ",sum INTEGER" +
+                ");");
         // ネガポジ用のテーブル
-        db.execSQL("create table negapoji(" +
+        db.execSQL("CREATE TABLE negapozi(" +
                 "id INTEGER PRIMARY KEY " +
                 ",Pozi REAR " +
                 ",Nega REAR " +
@@ -27,7 +35,6 @@ public class GuchiCommonDBOpenHelper extends SQLiteOpenHelper {
                 ",Month INTEGER " +
                 ",Day INTEGER " +
                 ");");
-
     }
 
     @Override
