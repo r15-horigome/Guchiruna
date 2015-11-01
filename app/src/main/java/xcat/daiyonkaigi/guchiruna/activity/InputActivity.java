@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,8 +17,10 @@ import net.reduls.sanmoku.Morpheme;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import xcat.daiyonkaigi.guchiruna.R;
 import xcat.daiyonkaigi.guchiruna.db.GuchiCommonDBOpenHelper;
@@ -76,6 +79,10 @@ public class InputActivity extends Activity {
                         }
                     }
                 }
+                //TODO デバック用
+                //コメントアウトするなり削除するなり自由です。
+                //ネガポジ機能デバック用データの作成
+                //createNegapoziData();
                 //次画面での表示処理
                 Intent timelineIntent = new Intent(InputActivity.this, TimelineActivity.class);
                 startActivity(timelineIntent);
@@ -89,7 +96,7 @@ public class InputActivity extends Activity {
         //getMenuInflater().inflate(R.menu.menu_bottom, menu);
         //TODO メニュー処理の実装（ここじゃない気がする）
         menu.add(0 , Menu.FIRST , Menu.NONE , "メニュー1");
-        menu.add(0 , Menu.FIRST + 1 ,Menu.NONE , "メニュー2");
+        menu.add(0, Menu.FIRST + 1, Menu.NONE, "メニュー2");
         return true;
     }
 
@@ -131,5 +138,78 @@ public class InputActivity extends Activity {
         String hinsi = tokens[0];
         //クソ判定
         return ("動詞".equals(hinsi) || "名詞".equals(hinsi) || "形容詞".equals(hinsi));
+    }
+    /**
+     *
+     *  ネガポジ機能デバック用データを登録するメソッドです。
+     *  現在日時から過去一年分のデータを作成します。
+     *  1日1回愚痴を入力したと想定して、ポジティブ/ネガティブ度数を乱数で設定しています。
+     *  削除していただいても結構です。
+     */
+    public void createNegapoziData(){
+        // 現在日時の取得
+        Calendar cal = Calendar.getInstance();
+        String yearStr = "" + cal.get(Calendar.YEAR);
+        String monthStr = "" + cal.get(Calendar.MONTH);
+        String dayStr = "" + cal.get(Calendar.DATE);
+        int year = Integer.parseInt(yearStr);
+        int month = Integer.parseInt(monthStr);
+        int day = Integer.parseInt(dayStr);
+        //DBの初期化処理
+        GuchiCommonDBOpenHelper helper = new GuchiCommonDBOpenHelper(this);
+        final SQLiteDatabase db = helper.getWritableDatabase();
+
+        /*
+         * テストデータ初期化用
+         * テーブル negapozi 中身を空にします。
+         */
+        db.delete( "negapozi", null, null );
+
+        // 月の最大値
+        int max = 0;
+        int monthmax = 0;
+        Random rnd;
+        int kekka = 0;
+        long ret;
+        Log.e("Negapozi", "------------TESTDATA CREATE START-------------");
+        try {
+            while (monthmax < 12) {
+                Log.e("Negapozi", "1カ月目");
+                // 月の最大値初期化
+                max = 0;
+                while (max < 31) {
+                    //乱数の取得
+                    //-3～3の乱数を取得する
+                    rnd = new Random();
+                    kekka = rnd.nextInt(7) - 3;
+                    if (kekka > 0) {
+                        Log.e("Negapozi","ポジティブ度"+ kekka);
+                        //DBに保存 ポジティブ度数、年月日
+                        ContentValues values = new ContentValues();
+                        values.put("Pozi", kekka);
+                        values.put("Year", year);
+                        values.put("Month", monthmax+ 1);
+                        values.put("Day", max + 1);
+                        ret = db.insert("negapozi", null, values);
+                        Log.e("Negapozi", ret + "レコード目");
+                    } else {
+                        Log.e("Negapozi","ネガティブ度"+ kekka);
+                        //DBに保存 ネガティブ度数、年月日
+                        ContentValues values = new ContentValues();
+                        values.put("Nega", kekka * -1);
+                        values.put("Year", year);
+                        values.put("Month", monthmax + 1);
+                        values.put("Day", max + 1);
+                        ret = db.insert("negapozi", null, values);
+                        Log.e("Negapozi", ret + "レコード目");
+                    }
+                    max++;
+                    day++;
+                }
+                monthmax++;
+            }
+        }finally {
+            db.close();
+        }
     }
 }

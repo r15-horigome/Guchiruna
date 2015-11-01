@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -15,9 +16,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+import java.util.Random;
 
 import xcat.daiyonkaigi.guchiruna.db.GuchiCommonDBOpenHelper;
-
 
 /**
  * ネガポジ判定、結果をDBに登録するためのクラスです。【奥村追加】
@@ -34,6 +35,69 @@ public class AsyncHttpRequest extends AsyncTask<String, String, String> {
 
     @Override
     protected String doInBackground(String... str) {
+
+        //DBの初期化処理
+        GuchiCommonDBOpenHelper helper = new GuchiCommonDBOpenHelper(mainActivity);
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        /*
+                * ネガポジ機能テスト用
+                 * ネガポジ用データをDBに登録
+                 */
+        // 日付の取得　年月日
+        /*Calendar cal2 = Calendar.getInstance();
+        String yearStr = "" + cal2.get(Calendar.YEAR);
+        String monthStr = "" + cal2.get(Calendar.MONTH);
+        String dayStr = "" + cal2.get(Calendar.DATE);
+        int year = Integer.parseInt(yearStr);
+        int month = Integer.parseInt(monthStr);
+        int day = Integer.parseInt(dayStr);
+        /*
+         *  テストデータ作成用
+         *  乱数でネガポジ度数を出して、DBに登録してます。
+         *  現在日時の月日分のデータを登録しています。
+         *
+         * */
+       /*int max = 0;
+        Random rnd;
+        int kekka2 = 0;
+        float kekka3;
+        long ret;
+        Log.e("test", "テストデータ作成開始");
+        try {
+            while (max < 31) {
+                Log.e("test", max + "回目");
+                //乱数の取得
+                //-3～3の乱数を生成する
+                rnd = new Random();
+                kekka2 = rnd.nextInt(7) - 3;
+                if (kekka2 > 0) {
+                    Log.e("test", kekka2 + "：POZI乱数");
+                    //DBに保存 ポジティブ度数、年月日
+                    ContentValues values = new ContentValues();
+                    values.put("Pozi", kekka2);
+                    values.put("Year", year);
+                    values.put("Month", month);
+                    values.put("Day", max + 1);
+                    ret = db.insert("negapozi", null, values);
+                    Log.e("test", ret + "行目作成");
+                } else {
+                    Log.e("test", kekka2 + "：NEGA乱数");
+                    //DBに保存 ネガティブ度数、年月日
+                    ContentValues values = new ContentValues();
+                    values.put("Nega", kekka2 * -1);
+                    values.put("Year", year);
+                    values.put("Month", month);
+                    values.put("Day", max + 1);
+                    ret = db.insert("negapozi", null, values);
+                    Log.e("test", ret + "行目作成");
+                }
+                max++;
+                day++;
+            }
+        }finally {
+            db.close();
+        }*/
 
         String kakikomi = new String();
         byte[] strByte = new byte[]{(byte) 0xF8, (byte) 0x9F};//UTF-8にするための変数
@@ -114,6 +178,7 @@ public class AsyncHttpRequest extends AsyncTask<String, String, String> {
         //切り出した度数を浮動小数点に変換
         float kekka = Float.parseFloat(b);
         // tvv5.setText("" + kekka);   //★消してOK
+        Log.e("FLOAT型に変換：",""+kekka);
 
         // 日付の取得　年月日
         Calendar cal = Calendar.getInstance();
@@ -142,6 +207,7 @@ public class AsyncHttpRequest extends AsyncTask<String, String, String> {
             long ret;
             try {
                 ret = db.insert("negapozi", null, values);
+                Log.e("ポジティブ度数：",values+"："+ret);
             } finally {
                 db.close();
             }
@@ -159,9 +225,12 @@ public class AsyncHttpRequest extends AsyncTask<String, String, String> {
             long ret;
             try {
                 ret = db.insert("negapozi", null, values);
+                Log.e("ネガティブ度数：",values+"："+ret);
             } finally {
                 db.close();
             }
         }
+
+
     }
 }
