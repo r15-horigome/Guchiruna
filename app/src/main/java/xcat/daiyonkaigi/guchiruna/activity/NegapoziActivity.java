@@ -1,4 +1,4 @@
-﻿package xcat.daiyonkaigi.guchiruna.activity;
+package xcat.daiyonkaigi.guchiruna.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -155,14 +155,12 @@ public class NegapoziActivity extends Activity implements View.OnClickListener {
             Log.e("NEGAPOZI", "最小年：" + this.MINYEAR + "最小月" + this.MINMONTH);
             mindateroop = mindate.moveToNext();
         }
-	/* 
-	 * TODO 2015/11/05:積み上げグラフからの修正 
-	 */
+
+	 //TODO 2015/11/05:積み上げグラフからの修正
         if ( (this.MINYEAR == 0) || (this.MINMONTH == 0) ){
             this.MINYEAR = NOWYEAR;
             this.MINMONTH = NOWMONTH;
         }
-        Log.e("test","min"+this.MINYEAR+":"+this.MINMONTH);
 
         Log.e("NEGAPOZI--START--", yearStr + monthStr + dayStr);
         // グラフ描画（月単位用）
@@ -386,9 +384,7 @@ public class NegapoziActivity extends Activity implements View.OnClickListener {
             maxDays = MONTHDAYS[this.MONTH-1];
         }
         while (graphcount < maxDays){
-	/* 
-	 * TODO 2015/11/05:積み上げグラフからの修正 
-	 */
+            //TODO 2015/11/05:積み上げグラフからの修正
             /*pozisum = pozisum + totalpozi[graphcount];
             negasum = negasum + totalnega[graphcount];
             seriespozi.add(graphcount+1,pozisum);
@@ -431,11 +427,11 @@ public class NegapoziActivity extends Activity implements View.OnClickListener {
         // *** Y軸の目盛間隔とフォントの変更
         ValueAxis yAxis = plot.getRangeAxis();
         TickUnits ty = new TickUnits();
-        TickUnit uniY = new NumberTickUnit(3);
+        TickUnit uniY = new NumberTickUnit(4);
         ty.add(uniY);
         yAxis.setStandardTickUnits(ty);
         yAxis.setTickLabelFont(xyTitleFont);
-        yAxis.setRange(0, 15);
+        yAxis.setRange(0, 20);
         yAxis.setLabelFont(xyTitleFontLabel);
         // *** x軸の目盛間隔とフォントの変更
         ValueAxis xAxis = plot.getDomainAxis();
@@ -595,9 +591,7 @@ public class NegapoziActivity extends Activity implements View.OnClickListener {
         //seriesnega.add(0.0,0.0);
         /* 折れ線グラフ描画 */
         while (graphcount < MONTHDAYS[this.MONTH-1]){
-	/* 
-	 * TODO 2015/11/05:積み上げグラフからの修正 
-	 */
+            //TODO 2015/11/05:積み上げグラフからの修正
             /*
             pozisum = pozisum + totalpozi[graphcount];
             negasum = negasum + totalnega[graphcount];
